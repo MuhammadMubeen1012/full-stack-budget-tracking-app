@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email String @unique
+  hash  String
+
+  firstName String
+  lastName  String
+  Income    Income[]
+  Expense   Expense[]
+  Saving    Saving[]
+}
+
+model Income {
+  // uid, id, name, type, amount, date, description, expenses[], savings[]
+  id          Int      @id @default(autoincrement())
+  name        String
+  type        String
+  amount      Int
+  date        DateTime
+  description String
+
+  uid  Int
+  user User @relation(fields: [uid], references: [id])
+
+  IncomeSavingRelationship   IncomeSavingRelationship[]
+  IncomeExpensesRelationship IncomeExpensesRelationship[]
+}
+
+model Expense {
+  // uid, id, name, type, amount, date, description, incomeID 
+  id          Int      @id @default(autoincrement())
+  name        String
+  type        String
+  amount      Int
+  date        DateTime
+  description String
+
+  uid  Int
+  user User @relation(fields: [uid], references: [id])
+
+  IncomeExpensesRelationship IncomeExpensesRelationship[]
+}
+
+model Saving {
+  // uid, id, source, amount, deadline, description, incomeID 
+  id          Int      @id @default(autoincrement())
+  source      String
+  amount      Int
+  deadline    DateTime
+  description String
+
+  uid  Int
+  user User @relation(fields: [uid], references: [id])
+
+  IncomeSavingRelationship IncomeSavingRelationship[]
+}
+
+model IncomeExpensesRelationship {
+  id Int @id @default(autoincrement())
+
+  income   Income @relation(fields: [incomeID], references: [id])
+  incomeID Int
+
+  expense   Expense @relation(fields: [expenseID], references: [id])
+  expenseID Int
+}
+
+model IncomeSavingRelationship {
+  id Int @id @default(autoincrement())
+
+  income   Income @relation(fields: [incomeID], references: [id])
+  incomeID Int
+
+  saving   Saving @relation(fields: [savingID], references: [id])
+  savingID Int
+}
